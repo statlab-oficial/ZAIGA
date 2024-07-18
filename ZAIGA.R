@@ -1,3 +1,8 @@
+# Departamento de Estatística e Matemática Aplicada
+# Universidade Federal de Campina Grande
+# Orientador : Prof . Dr . Manoel Santos-Neto
+# Autores : Jaiany Nunes, Luan Sousa, Marcus
+
 ZAIGA <- function(mu.link = "log", sigma.link = "log", nu.link = "logit"){
   mstats <- checklink("mu.link", "ZAIGA", substitute(mu.link), 
       c("inverse", "log", "identity", "own"))
@@ -30,7 +35,7 @@ ZAIGA <- function(mu.link = "log", sigma.link = "log", nu.link = "logit"){
       d2ldmdv = function(y) rep(0, length(y)), 
       d2ldddv = function(y) rep(0, length(y)), 
       G.dev.incr = function(y, mu, sigma, nu, ...) -2 * dZAIGA(y, mu, sigma, nu, log = TRUE), 
-      rqres = expression(rqres(pfun = "pZAGA", type = "Mixed", mass.p = 0, prob.mp = nu, y = y, mu = mu, sigma = sigma, nu = nu)), 
+      rqres = expression(rqres(pfun = "pZAIGA", type = "Mixed", mass.p = 0, prob.mp = nu, y = y, mu = mu, sigma = sigma, nu = nu)), 
       mu.initial = expression(mu <- rep(mean(y) , length(y))), 
       sigma.initial = expression(sigma <- rep(((mean(y)^2)/var(y)), length(y))), 
       nu.initial = expression(nu <- rep(0.5, length(y))), 
@@ -58,7 +63,7 @@ dZAIGA <- function(x, mu = 1, sigma = 1, nu = 0.1, log = FALSE){
   fy
 }
 
-pZAGA <- function(q, mu = 1, sigma = 1, nu = 0.1, lower.tail = TRUE, log.p = FALSE){
+pZAIGA <- function(q, mu = 1, sigma = 1, nu = 0.1, lower.tail = TRUE, log.p = FALSE){
   if (any(mu < 0)) 
       stop(paste("mu must be positive", "\n", ""))
   if (any(sigma < 0)) 
@@ -120,7 +125,6 @@ rZAIGA <- function (n, mu = 1, sigma = 1, nu = 0.1, ...){
   r <- qZAIGA(p, mu = mu, sigma = sigma, nu = nu, ...)
   r
 }
-
 
 plotZAIGA <- function (mu = 1, sigma = 1, nu = 0.1, from = 0, to = 10, n = 101, 
   main = NULL, ...){
