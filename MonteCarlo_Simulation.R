@@ -7,8 +7,8 @@
 library(gamlss)
 library(MonteCarlo)
 library(tidyverse)
-library(simhelpers)
 library(boot)
+library(simhelpers)
 library(LaplacesDemon) 
 
 ## Carregando a funcoes de ZAIGA.R
@@ -17,24 +17,25 @@ devtools::source_url("https://github.com/statlab-oficial/ZAIGA/blob/main/ZAIGA.R
 # Funcoes auxiliares
 my.gamlss <- function (...) tryCatch (expr = gamlss(...), error = function(e) NA)
 
-
 est <- function(n, nu0){
   coef_mu <- c(0.5, 1.0, 2.5)
   coef_sigma <- c(1.1, 2.0)
   coef_nu <- nu0
+ 
   x1 <- runif(n)
   x2 <- runif(n)
   z1 <- runif(n)
+  
   X <- model.matrix(~x1+x2)
   Z <- model.matrix(~z1)
   eta <- as.vector(X%*%coef_mu)
   eta1 <- as.vector(Z%*%coef_sigma)
-  mu   <- as.vector(exp(eta))
-  sigma   <- as.vector(exp(eta1))
-  nu <- invlogit(coef_nu)
-  
+  vector_mu   <- as.vector(exp(eta))
+  vector_sigma   <- as.vector(exp(eta1))
+  vector_nu <- rep(invlogit(coef_nu), n)
+ 
   repeat{
-    y <- mapply(rZAIGA, n = 1,  mu, sigma, nu)
+    y <- mapply(rZAIGA, n = 1,  vector_mu, vector_sigma, vector_nu)
     data_sim <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
     conh0 <- gamlss.control(trace = FALSE, autostep = FALSE, save = TRUE)
     
@@ -54,8 +55,6 @@ est <- function(n, nu0){
     
     if(all(gen_test, conv_test, nu_test, mu_test, sigma_test) == TRUE) break
   }
-
-
 
   mle_mu <- unname(fit$mu.coefficients)
   mle_sigma <- unname(fit$sigma.coefficients)
@@ -77,8 +76,7 @@ nu_grid <- c(0.20, 0.50, 0.70)
 param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
 MC_result <- MonteCarlo(est, 
-nrep = 5000,
-ncpus = 2,
+nrep = 10000,
 param_list = param_list)
 
 df <- MakeFrame(MC_result) |> 
@@ -88,7 +86,7 @@ df <- MakeFrame(MC_result) |>
     truesigma1 = 1.1,
       truesigma2 = 2.0)
 
- result_mu1 <- df |> 
+result_mu1 <- df |> 
   select(n, mu1, nu0, truemu1) |>
   group_by(n, nu0, truemu1) |>
   do(calc_absolute(., estimates = mu1, true_param = truemu1, criteria = c("bias", "rmse")))
