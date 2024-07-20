@@ -1,7 +1,49 @@
 # Departamento de Estatística e Matemática Aplicada
-# Universidade Federal de Campina Grande
+# Universidade Federal do Ceará
 # Orientador : Prof . Dr . Manoel Santos-Neto
 # Autores : Jaiany Nunes, Luan Sousa, Marcus
+
+####
+#Codes  obtained from Bourguignon and Gallardo (2020)
+
+pIGAMMA2<-function (q, mu = 1, sigma = 0.5, lower.tail = TRUE, log.p = FALSE) 
+{
+    if (any(mu <= 0)) 
+        stop(paste("mu must be greater than 0", "\n", ""))
+    if (any(sigma <= 0)) 
+        stop(paste("sigma must be greater than 0", "\n", ""))
+    if (any(q < 0)) 
+        stop(paste("q must be greater than 0", "\n", ""))
+    lcdf <- pgamma(((mu * (1 + sigma))/q), shape = (sigma+2), lower.tail = FALSE, 
+        log.p = TRUE)
+    if (log.p == FALSE) 
+        cdf <- exp(lcdf)
+    else cdf <- lcdf
+    if (lower.tail == TRUE) 
+        cdf <- cdf
+    else cdf <- 1 - cdf
+    cdf
+}
+
+qIGAMMA2 <-function (p, mu = 1, sigma = 0.5, lower.tail = TRUE, log.p = FALSE) 
+{
+    if (any(mu < 0)) 
+        stop(paste("mu must be positive", "\n", ""))
+    if (any(sigma < 0)) 
+        stop(paste("sigma must be positive", "\n", ""))
+    if (log.p == TRUE) 
+        p <- exp(p)
+    else p <- p
+    if (lower.tail == TRUE) 
+        p <- p
+    else p <- 1 - p
+    if (any(p < 0) | any(p > 1)) 
+        stop(paste("p must be between 0 and 1", "\n", ""))
+	y<- qgamma(1-p, shape= (sigma+2), rate=mu*(sigma+1))
+	1/y
+}
+
+###########################################################
 
 ZAIGA <- function(mu.link = "log", sigma.link = "log", nu.link = "logit"){
   mstats <- checklink("mu.link", "ZAIGA", substitute(mu.link), 
@@ -70,7 +112,7 @@ pZAIGA <- function(q, mu = 1, sigma = 1, nu = 0.1, lower.tail = TRUE, log.p = FA
       stop(paste("sigma must be positive", "\n", ""))
   if (any(nu < 0) | any(nu > 1)) 
       stop(paste("nu must be between 0 and 1", "\n", ""))
-  cdf <- pgamma(((mu * (1+sigma))/q), shape = (sigma+2))
+  cdf <- pIGAMMA2(q = q, mu = mu, sigma = sigma)
   cdf <- ifelse((q == 0), nu, nu + (1 - nu)*cdf)
   if (lower.tail == TRUE) 
       cdf <- cdf
@@ -107,7 +149,7 @@ qZAIGA <- function (p, mu = 1, sigma = 1, nu = 0.1, lower.tail = TRUE,
   if (length(nu) == 1) 
       p[which_zero] <- nu
   else p[which_zero] <- nu[which_zero]
-  return(qgamma((p - nu)/(1 - nu), shape = (sigma+2), rate=mu*(sigma+1)))
+  return(qIGAMMA2((p - nu)/(1 - nu), mu = mu, sigma = sigma))
 }
 
 
