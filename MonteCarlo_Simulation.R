@@ -18,15 +18,14 @@ devtools::source_url("https://github.com/statlab-oficial/ZAIGA/blob/main/ZAIGA.R
 my.gamlss <- function (...) tryCatch (expr = gamlss(...), error = function(e) NA)
 
 est <- function(n, nu0){
-  coef_mu <- c(0.5, 1.0, 2.5)
-  coef_sigma <- c(1.1, 2.0)
+  coef_mu <- c(0.5, -0.2)
+  coef_sigma <- c(-1.6, 3.0)
   coef_nu <- nu0
  
   x1 <- runif(n)
-  x2 <- runif(n)
   z1 <- runif(n)
   
-  X <- model.matrix(~x1+x2)
+  X <- model.matrix(~x1)
   Z <- model.matrix(~z1)
   eta <- as.vector(X%*%coef_mu)
   eta1 <- as.vector(Z%*%coef_sigma)
@@ -36,10 +35,10 @@ est <- function(n, nu0){
  
   repeat{
     y <- mapply(rZAIGA, n = 1,  vector_mu, vector_sigma, vector_nu)
-    data_sim <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
+    data_sim <- data.frame(y = y, x1 = x1, z1 = z1)
     conh0 <- gamlss.control(trace = FALSE, autostep = FALSE, save = TRUE)
     
-    fit <- my.gamlss(y ~ x1 + x2, 
+    fit <- my.gamlss(y ~ x1, 
       sigma.fo = ~ z1, 
       nu.fo = ~1, 
       family = ZAIGA(),
@@ -62,7 +61,6 @@ est <- function(n, nu0){
 
   out <- list("mu1" = mle_mu[1],
               "mu2" = mle_mu[2],
-              "mu3" = mle_mu[3],
               "sigma1" = mle_sigma[1],
               "sigma2" = mle_sigma[2],
               "nu" = mle_nu)

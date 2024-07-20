@@ -39,7 +39,8 @@ qIGAMMA2 <-function (p, mu = 1, sigma = 0.5, lower.tail = TRUE, log.p = FALSE)
     else p <- 1 - p
     if (any(p < 0) | any(p > 1)) 
         stop(paste("p must be between 0 and 1", "\n", ""))
-	y<- qgamma(1-p, shape= (sigma+2), rate=mu*(sigma+1))
+	y <- qgamma(1-p, shape= (sigma+2), rate=mu*(sigma+1))
+
 	1/y
 }
 
@@ -80,7 +81,7 @@ ZAIGA <- function(mu.link = "log", sigma.link = "log", nu.link = "logit"){
       rqres = expression(rqres(pfun = "pZAIGA", type = "Mixed", mass.p = 0, prob.mp = nu, y = y, mu = mu, sigma = sigma, nu = nu)), 
       mu.initial = expression(mu <- rep(mean(y) , length(y))), 
       sigma.initial = expression(sigma <- rep(((mean(y)^2)/var(y)), length(y))), 
-      nu.initial = expression(nu <- rep(mean(y[y==0]), length(y))), 
+      nu.initial = expression(nu <- rep(0.5, length(y))), 
       mu.valid = function(mu) TRUE, 
       sigma.valid = function(sigma) all(sigma > 0), 
       nu.valid = function(nu) all(nu > 0) && all(nu < 1), 
@@ -168,18 +169,28 @@ rZAIGA <- function (n, mu = 1, sigma = 1, nu = 0.1, ...){
   r
 }
 
-plotZAIGA <- function (mu = 1, sigma = 1, nu = 0.1, from = 0, to = 10, n = 101, 
-  main = NULL, ...){
-  y = seq(from = 0.001, to = to, length.out = n)
+plotZAIGA <- function (n_sample, mu = 1, sigma = 1, nu = 0.1, from = 0, n = 101, 
+  main = NULL){
+  x <-  rZAIGA(n_sample, mu, sigma, nu)  
+  xp <- x[x>0]  
+  h <- hist(xp, plot = FALSE)
+  nu0 <- length(x[x==0])/length(x)
+  h$counts <- (1-nu0)*(h$density) 
+  po <- c(0)
+  y = seq(from = 0.001, to = max(x), length.out = n)
   pdf <- dZAIGA(y, mu = mu, sigma = sigma, nu = nu)
   pr0 <- c(dZAIGA(0, mu = mu, sigma = sigma, nu = nu))
-  po <- c(0)
+
   if (is.null(main)) 
-      main = "Zero Adj. Inverse Gamma"
-  plot(pdf ~ y, main = main, ylim = c(0, max(pdf, pr0)), type = "l", 
-      ...)
-  points(po, pr0, type = "h", ...)
-  points(po, pr0, type = "p", col = "blue")
+    main = "Zero Adj. Inverse Gamma"  
+  plot(h, main = main, ylim = c(0, max(pdf, pr0)), xlab = "Sample", ylab = "Density")
+  box()
+  points(po, nu0, type = "h")
+  points(po, nu0, type = "p", col = "red")
+    
+  lines(pdf ~ y, col = "blue")
+  points(po, pr0, type = "h", col = "blue")
+  points(po, pr0, type = "p", col = "blue", pch = 16)
 }
 
 meanZAIGA <- function (obj){
@@ -188,3 +199,5 @@ meanZAIGA <- function (obj){
   meanofY <- (1 - fitted(obj, "nu")) * fitted(obj, "mu")
   meanofY
 }
+
+
