@@ -77,7 +77,7 @@ nu_grid <- c(0.20, 0.50, 0.70)
 param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
 MC_result <- MonteCarlo(est, 
-nrep = 1000,
+nrep = 5000,
 param_list = param_list)
 
 df <- MakeFrame(MC_result) |> 
