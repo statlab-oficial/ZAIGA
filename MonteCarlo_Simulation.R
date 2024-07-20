@@ -26,7 +26,7 @@ est <- function(n, nu0){
   x2 <- runif(n)
   z1 <- runif(n)
   
-  X <- model.matrix(~x1)
+  X <- model.matrix(~x1+x2)
   Z <- model.matrix(~z1)
   eta <- as.vector(X%*%coef_mu)
   eta1 <- as.vector(Z%*%coef_sigma)
@@ -77,6 +77,7 @@ param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
 MC_result <- MonteCarlo(est, 
 nrep = 10000,
+ncpus = 1,
 param_list = param_list)
 
 df <- MakeFrame(MC_result) |> 
