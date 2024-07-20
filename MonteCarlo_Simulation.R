@@ -35,7 +35,7 @@ est <- function(n, nu0){
   
   repeat{
     y <- mapply(rZAIGA, n = 1,  mu, sigma, nu)
-    data_sim <- data.frame(y = y, x1 = x1, x2 = x2)
+    data_sim <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
     conh0 <- gamlss.control(trace = FALSE, autostep = FALSE, save = TRUE)
     
     fit <- my.gamlss(y ~ x1 + x2, 
