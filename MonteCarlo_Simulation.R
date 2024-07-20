@@ -9,7 +9,7 @@ library(MonteCarlo)
 library(tidyverse)
 library(simhelpers)
 library(boot)
-library(LaplacesDemon)
+library(LaplacesDemon) 
 
 ## Carregando a funcoes de ZAIGA.R
 devtools::source_url("https://github.com/statlab-oficial/ZAIGA/blob/main/ZAIGA.R?raw=TRUE")
@@ -39,7 +39,7 @@ est <- function(n, nu0){
     conh0 <- gamlss.control(trace = FALSE, autostep = FALSE, save = TRUE)
     
     fit <- my.gamlss(y ~ x1 + x2, 
-      sigma.fo = ~ x2, 
+      sigma.fo = ~ z1, 
       nu.fo = ~1, 
       family = ZAIGA(),
       data = data_sim,
@@ -78,6 +78,7 @@ param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
 MC_result <- MonteCarlo(est, 
 nrep = 5000,
+ncpus = 2,
 param_list = param_list)
 
 df <- MakeFrame(MC_result) |> 
