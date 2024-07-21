@@ -21,9 +21,12 @@ est <- function(n, nu0){
   coef_mu <- c(0.5, 1.0, 2.5)
   coef_sigma <- c(1.1, 2.0)
   coef_nu <- nu0
- 
+  
+  set.seed(10)
   x1 <- runif(n)
+  set.seed(200)
   x2 <- runif(n)
+  set.seed(100)
   z1 <- runif(n)
   
   X <- model.matrix(~x1+x2)
@@ -33,14 +36,14 @@ est <- function(n, nu0){
   vector_mu   <- as.vector(exp(eta))
   vector_sigma   <- as.vector(exp(eta1))
   vector_nu <- rep(invlogit(coef_nu), n)
- 
+  
   repeat{
-    y <- mapply(rZAIGA, n = 1,  vector_mu, vector_sigma, vector_nu)
-    data_sim <- data.frame(y = y, x1 = x1, x2 = x2, z1 = z1)
+   y <- mapply(rZAIGA, n = 1,  vector_mu, vector_sigma, vector_nu)
+   data_sim <- data.frame(yi = y, x1i = x1, x2i = x2, z1i = z1)
     conh0 <- gamlss.control(trace = FALSE, autostep = FALSE, save = TRUE)
     
-    fit <- my.gamlss(y ~ x1 + x2, 
-      sigma.fo = ~ z1, 
+    fit <- my.gamlss(yi ~ x1i + x2i, 
+      sigma.fo = ~ z1i, 
       nu.fo = ~1, 
       family = ZAIGA(),
       data = data_sim,
@@ -76,7 +79,7 @@ nu_grid <- c(0.20, 0.50, 0.70)
 param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
 MC_result <- MonteCarlo(est, 
-nrep = 10000,
+nrep = 100,
 ncpus = 1,
 param_list = param_list)
 
