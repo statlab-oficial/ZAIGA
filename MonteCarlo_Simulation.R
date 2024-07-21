@@ -18,15 +18,13 @@ devtools::source_url("https://github.com/statlab-oficial/ZAIGA/blob/main/ZAIGA.R
 my.gamlss <- function (...) tryCatch (expr = gamlss(...), error = function(e) NA)
 
 est <- function(n, nu0){
+
   coef_mu <- c(0.5, 1.0, 2.5)
   coef_sigma <- c(1.1, 2.0)
   coef_nu <- nu0
   
-  set.seed(10)
   x1 <- runif(n)
-  set.seed(200)
   x2 <- runif(n)
-  set.seed(100)
   z1 <- runif(n)
   
   X <- model.matrix(~x1+x2)
@@ -78,6 +76,7 @@ nu_grid <- c(0.20, 0.50, 0.70)
 
 param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
+set.seed(10)
 MC_result <- MonteCarlo(est, 
 nrep = 100,
 ncpus = 1,
@@ -93,36 +92,36 @@ df <- MakeFrame(MC_result) |>
 result_mu1 <- df |> 
   select(n, mu1, nu0, truemu1) |>
   group_by(n, nu0, truemu1) |>
-  do(calc_absolute(., estimates = mu1, true_param = truemu1, criteria = c("bias", "rmse")))
+  do(calc_relative(., estimates = mu1, true_param = truemu1, criteria = c("relative bias", "relative rmse")))
 print(result_mu1)
 
 result_mu2 <- df |> 
   select(n, mu2, nu0, truemu2) |>
   group_by(n, nu0, truemu2) |>
-  do(calc_absolute(., estimates = mu2, true_param = truemu2, criteria = c("bias", "rmse")))
+  do(calc_relative(., estimates = mu2, true_param = truemu2, criteria = c("relative bias", "relative rmse")))
 print(result_mu2)
 
 result_mu3 <- df |> 
   select(n, mu3, nu0, truemu3) |>
   group_by(n, nu0, truemu3) |>
-  do(calc_absolute(., estimates = mu3, true_param = truemu3, criteria = c("bias", "rmse")))
+  do(calc_relative(., estimates = mu3, true_param = truemu3, criteria = c("relative bias", "relative rmse")))
 print(result_mu3)
 
 result_sigma1 <- df |> 
   select(n, sigma1, nu0, truesigma1) |>
   group_by(n, nu0, truesigma1) |>
-  do(calc_absolute(., estimates = sigma1, true_param = truesigma1, criteria = c("bias", "rmse")))
+  do(calc_relative(., estimates = sigma1, true_param = truesigma1, criteria = c("relative bias", "relative rmse")))
 print(result_sigma1)
 
 result_sigma2 <- df |> 
   select(n, sigma2, nu0, truesigma2) |>
   group_by(n, nu0, truesigma2) |>
-  do(calc_absolute(., estimates = sigma2, true_param = truesigma2, criteria = c("bias", "rmse")))
+  do(calc_relative(., estimates = sigma2, true_param = truesigma2, criteria = c("relative bias", "relative rmse")))
 print(result_sigma2)
 
 result_nu <- df |> 
   select(n, nu, nu0) |>
   group_by(n, nu0) |>
-  do(calc_absolute(., estimates = nu, true_param = nu0, criteria = c("bias", "rmse")))
+  do(calc_relative(., estimates = nu, true_param = nu0, criteria = c("relative bias", "relative rmse")))
 print(result_nu)
 
