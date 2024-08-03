@@ -1,10 +1,25 @@
 # Departamento de Estatística e Matemática Aplicada
 # Universidade Federal do Ceará
 # Orientador : Prof . Dr . Manoel Santos-Neto
-# Autores : Jaiany Nunes, Luan Sousa, Marcus
+# Autores : Jaiany Nunes, Luan Sousa, Marcus Vinicius
 
 ####
 #Codes  obtained from Bourguignon and Gallardo (2020)
+dIGAMMA2 <- function (x, mu = 1, sigma = 0.5, log = FALSE) 
+{
+    if (any(mu < 0)) 
+        stop(paste("mu must be greater than 0", "\n", ""))
+    if (any(sigma <= 0)) 
+        stop(paste("sigma must be greater than 0", "\n", ""))
+    if (any(x < 0)) 
+        stop(paste("x must be greater than 0", "\n", ""))
+    lfy <- (sigma+2) * (log(mu) + log1p(sigma)) - lgamma(sigma+2) - (sigma + 3) * log(x) - mu*(sigma+1)/x
+    if (log == FALSE) 
+        fy <- exp(lfy)
+    else fy <- lfy
+    fy
+}
+
 
 pIGAMMA2<-function (q, mu = 1, sigma = 0.5, lower.tail = TRUE, log.p = FALSE) 
 {
@@ -79,8 +94,8 @@ ZAIGA <- function(mu.link = "log", sigma.link = "log", nu.link = "logit"){
       d2ldddv = function(y) rep(0, length(y)), 
       G.dev.incr = function(y, mu, sigma, nu, ...) -2 * dZAIGA(y, mu, sigma, nu, log = TRUE), 
       rqres = expression(rqres(pfun = "pZAIGA", type = "Mixed", mass.p = 0, prob.mp = nu, y = y, mu = mu, sigma = sigma, nu = nu)), 
-      mu.initial = expression(mu <- rep(mean(y) , length(y))), 
-      sigma.initial = expression(sigma <- rep(((mean(y)^2)/var(y)), length(y))), 
+      mu.initial = expression(mu <- (y + mean(y))/2), 
+      sigma.initial = expression(sigma <- rep(1, length(y))), 
       nu.initial = expression(nu <- rep(0.5, length(y))), 
       mu.valid = function(mu) TRUE, 
       sigma.valid = function(sigma) all(sigma > 0), 
@@ -98,7 +113,7 @@ dZAIGA <- function(x, mu = 1, sigma = 1, nu = 0.1, log = FALSE){
       stop(paste("sigma must be positive", "\n", ""))
   if (any(nu < 0) | any(nu > 1)) 
       stop(paste("nu must be between 0 and 1", "\n", ""))
-  log.lik <- ifelse(x == 0, log(nu), (sigma+2) * (log(mu) + log1p(sigma)) - lgamma(sigma+2) - (sigma + 3) * log(x) - mu*(sigma+1)/x)
+  log.lik <- ifelse(x == 0, log(nu), log(1-nu) +  dIGAMMA2(x, mu, sigma, log = TRUE) )
   if (log == FALSE) 
       fy <- exp(log.lik)
   else fy <- log.lik
@@ -199,5 +214,7 @@ meanZAIGA <- function (obj){
   meanofY <- (1 - fitted(obj, "nu")) * fitted(obj, "mu")
   meanofY
 }
+
+
 
 

@@ -1,7 +1,7 @@
 # Departamento de Estatística e Matemática Aplicada
 # Universidade Federal do Ceará
 # Orientador : Prof . Dr . Manoel Santos-Neto
-# Autores : Jaiany Nunes, Luan Sousa, Marcus
+# Autores : Jaiany Nunes, Luan Sousa, Marcus Vinicius
 
 # Pacotes
 library(gamlss)
@@ -71,14 +71,14 @@ est <- function(n, nu0){
   out
 }
 
-n_grid <- c(50, 100, 200)
+n_grid <- seq(50, 200, by = 15)
 nu_grid <- c(0.20, 0.50, 0.70)
 
 param_list <- list("n" = n_grid, "nu0" = nu_grid)
 
 set.seed(10)
 MC_result <- MonteCarlo(est, 
-nrep = 100,
+nrep = 5000,
 ncpus = 1,
 param_list = param_list)
 
